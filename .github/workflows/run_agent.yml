@@ -1,0 +1,39 @@
+name: ARC-AGI-3 Agent Run
+
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+    inputs:
+      game:
+        description: 'Game to run (ls20 / ft09 / vc33 / all)'
+        required: false
+        default: 'all'
+      max_actions:
+        description: 'Max actions per game'
+        required: false
+        default: '500'
+
+jobs:
+  run-agent:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install arc-agi python-dotenv requests
+      - name: Run agent
+        env:
+          ARC_API_KEY: ${{ secrets.ARC_API_KEY }}
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          NOTION_PAGE_ID: ${{ secrets.NOTION_PAGE_ID }}
+          GAME: ${{ github.event.inputs.game || 'all' }}
+          MAX_ACTIONS: ${{ github.event.inputs.max_actions || '500' }}
+        run: python agents/run_agent.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: agent-results-${{ github.run_number }}
+          path: results/
+          retention-days: 30
