@@ -22,7 +22,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install arc-agi python-dotenv requests
+      - run: pip install arc-agi arcengine python-dotenv requests
       - name: Run agent
         env:
           ARC_API_KEY: ${{ secrets.ARC_API_KEY }}
